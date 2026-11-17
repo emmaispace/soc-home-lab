@@ -1,83 +1,141 @@
 
-# VMware Workstation Environment
+# VMware Workstation Environment – SOC Home Lab
 
-## 1. Overview
+## 1. Project Overview
 
-The SOC home lab is hosted on a physical computer running VMware Workstation 17 Pro.
+This document describes the physical host and virtualisation environment supporting my SOC Home Lab.
 
-The virtualisation platform provides an environment for developing and testing enterprise networking, Windows infrastructure and cybersecurity monitoring technologies.
+The environment uses VMware Workstation 17 Pro to host virtual machines for learning enterprise networking, systems administration, cybersecurity monitoring and security analysis.
+
+**Current status:** Virtual machine inventory confirmed. Network configuration and interface assignments are awaiting validation.
 
 ## 2. Physical Host Specifications
 
 | Component | Specification |
 |---|---|
-| Processor | Intel Core i7-8700 |
-| CPU Speed | 3.2 GHz |
-| RAM | 64 GB |
+| Processor | Intel Core i7-8700 @ 3.2 GHz |
+| Memory | 64 GB RAM |
 | Storage | 1.75 TB SSD |
 | Hypervisor | VMware Workstation 17 Pro |
+| Host OS | To be documented |
 
-## 3. Virtualisation Environment
+## 3. Virtual Machine Inventory
 
-VMware Workstation is used to create and manage virtual machines and virtual networks.
+The following eight virtual machines are installed in the environment.
 
-The environment is designed to separate internal users, servers, monitoring infrastructure and security testing systems.
-
-## 4. Virtual Machine Inventory
-
-| Virtual Machine | Operating System | Purpose |
+| Virtual Machine | Operating System | Intended Role |
 |---|---|---|
 | pfSense | pfSense | Firewall and routing |
-| Kali Linux | Kali Linux | Security testing |
-| DC01 | Windows Server 2019 | Active Directory |
-| Windows Client 01 | Windows 10 | Endpoint |
-| Windows Client 02 | Windows 10 | Endpoint |
-| Security Onion | Security Onion | Network monitoring |
-| Wazuh | Linux deployment | Security monitoring |
-| Splunk | Linux/Windows deployment | SIEM |
+| Windows Server 2022 | Windows Server 2022 | Server infrastructure and Active Directory |
+| Windows 10 Client 01 | Windows 10 | Endpoint workstation |
+| Windows 10 Client 02 | Windows 10 | Endpoint workstation |
+| Kali Linux | Kali Linux | Controlled security testing |
+| Security Onion | Security Onion | Network security monitoring |
+| Wazuh | Linux-based deployment | Endpoint security monitoring |
+| Splunk | Deployment OS to confirm | SIEM and log analysis |
 
-*Inventory entries must be verified against the current VMware installation before being treated as active systems.*
+Note: Installation does not necessarily mean that each machine is running or fully configured.
 
-## 5. Planned Virtual Network Architecture
+## 4. Virtual Network Architecture
 
-| VMware Network | Network Role | Subnet |
+The intended design separates the environment into different security zones.
+
+| VMware Network | Network Name | Intended Subnet |
 |---|---|---|
 | VMnet2 | LAN | 192.168.10.0/24 |
 | VMnet3 | DMZ | 192.168.20.0/24 |
-| VMnet4 | Server | 192.168.30.0/24 |
+| VMnet4 | SERVER | 192.168.30.0/24 |
 | VMnet5 | SOC | 192.168.40.0/24 |
-| VMnet6 | Red Team | 192.168.50.0/24 |
-| VMnet7 | Management | 192.168.60.0/24 |
-| VMnet8 | NAT / WAN | VMware NAT network |
+| VMnet6 | RED TEAM | 192.168.50.0/24 |
+| VMnet7 | MANAGEMENT | 192.168.60.0/24 |
+| VMnet8 | WAN / NAT | VMware NAT network |
 
-## 6. Project Objectives
+These are intended network assignments. Actual VMware subnet, DHCP and adapter settings must be verified before implementation is marked complete.
 
-- Develop an isolated virtual enterprise network.
-- Practise network segmentation and firewall configuration.
-- Deploy and manage Windows infrastructure.
-- Explore SIEM and endpoint monitoring technologies.
-- Develop network security monitoring capabilities.
-- Document technical configurations and troubleshooting activities.
+## 5. Virtual Machine Roles
+
+### 5.1 pfSense Firewall
+- Central firewall and routing platform.
+- Connects the virtual network security zones.
+- Provides controlled communication between networks.
+- Supports firewall rules, NAT and DHCP where configured.
+
+### 5.2 Windows Server 2022
+- Planned domain controller and infrastructure server.
+- Active Directory and domain services.
+- User and group administration.
+- Windows security event logging.
+
+### 5.3 Windows 10 Clients
+- Simulate employee workstations.
+- Support domain authentication exercises.
+- Generate endpoint security events.
+- Support controlled testing scenarios.
+
+### 5.4 Kali Linux
+- Controlled security testing environment.
+- Network discovery and assessment exercises.
+- Security testing against authorised lab systems.
+
+### 5.5 Security Onion
+- Network security monitoring.
+- Network traffic analysis.
+- Security alert investigation.
+
+### 5.6 Wazuh
+- Endpoint monitoring.
+- Security event collection.
+- Host-based security monitoring.
+
+### 5.7 Splunk
+- Security information and event management.
+- Log searching and analysis.
+- Security dashboard development.
+
+## 6. Implementation Objectives
+
+1. Verify VMware virtual network configuration.
+2. Map pfSense network adapters to the correct virtual networks.
+3. Configure WAN, LAN and additional firewall interfaces.
+4. Establish network segmentation.
+5. Configure Windows Server 2022 and Active Directory.
+6. Connect Windows clients to the domain.
+7. Deploy and configure Wazuh.
+8. Configure Splunk log collection and monitoring.
+9. Configure Security Onion for network monitoring.
+10. Develop security investigation scenarios.
 
 ## 7. Evidence and Documentation
 
-Screenshots, virtual machine configurations, network diagrams and implementation notes will be added as each stage is completed.
+The following evidence will be maintained:
+
+- VMware Virtual Network Editor screenshots.
+- Virtual machine network adapter settings.
+- pfSense interface assignments.
+- IP addressing and subnet documentation.
+- Firewall rules and connectivity tests.
+- Server and endpoint configuration screenshots.
+- Security monitoring dashboards.
+- Troubleshooting records.
 
 ## 8. Learning Outcomes
 
-This environment is intended to support practical learning in:
+The project aims to develop practical skills in:
 
-- Virtualisation
-- Network infrastructure
-- Windows Server administration
-- Active Directory
-- Network security
-- SIEM
-- Security monitoring
-- Incident investigation
+- Virtualisation and infrastructure management.
+- Network architecture and segmentation.
+- Firewall administration.
+- Windows Server and Active Directory.
+- SIEM and security monitoring.
+- Endpoint security.
+- Network traffic analysis.
+- Security investigation and technical documentation.
 
----
-**Project:** SOC Home Lab  
-**Author:** Emmanuel Addo Larbi  
-**Platform:** VMware Workstation 17 Pro
+## Project Information
+
+Author: Emmanuel Addo Larbi  
+Location: Scotland, United Kingdom  
+Platform: VMware Workstation 17 Pro  
+Project: SOC Home Lab  
+Career Focus: Entry-Level SOC Analyst
 
