@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-This document records the connectivity and firewall isolation tests performed in the SOC home lab. The purpose of the tests was to verify that the Windows client machines could communicate with the pfSense LAN gateway, access the internet and resolve domain names while being prevented from accessing protected internal network segments.
+This document records the connectivity and firewall isolation tests performed in the SOC home lab. The purpose of the tests was to verify that the Windows client machines could communicate with the pfSense LAN gateway, access the internet and resolve domain names while being prevented from accessing the tested protected internal network gateways.
 
 The tests were conducted using two Windows 10 client machines connected to the LAN network managed by pfSense.
 
@@ -14,7 +14,7 @@ The objectives of the testing were to:
 - Confirm that both Windows clients can access the internet.
 - Verify DNS resolution using an external DNS server.
 - Test whether the LAN clients can reach the protected internal network gateways.
-- Confirm that pfSense blocks unauthorised traffic.
+- Confirm that pfSense blocks traffic matching the configured firewall policy.
 - Examine firewall logs to obtain evidence of blocked network traffic.
 
 ## 3. Lab Environment
@@ -118,11 +118,11 @@ ping 192.168.50.1
 ping 192.168.60.254
 ```
 
-**Expected result:** The LAN clients should not be able to access these protected network gateways under the configured firewall policy.
+**Expected result:** Traffic from the LAN clients to the protected network gateways should be blocked by the configured firewall policy.
 
 **Observed result:** All five gateway tests failed with request timeouts. No ping replies were received.
 
-This indicated that traffic from the LAN clients to the tested protected network gateways was being blocked.
+The subsequent examination of pfSense firewall logs confirmed that the corresponding ICMP traffic from both Windows clients was blocked on the LAN interface.
 
 ## 5. pfSense Firewall Rule Configuration
 
@@ -130,16 +130,16 @@ The pfSense LAN firewall rules were examined to understand how the traffic restr
 
 The LAN rules included:
 
-1. Anti-lockout rule.
-2. A blocking rule named `BLOCK_LAN_TO_INTERNAL_NETWORKS`.
-3. The default rule allowing LAN traffic to other destinations.
-4. An IPv6 default allow rule.
+1. Anti-lockout rule – enabled.
+2. `BLOCK_LAN_TO_INTERNAL_NETWORKS` – enabled.
+3. Default allow LAN to any rule (IPv4) – enabled.
+4. Default allow LAN IPv6 to any rule – disabled.
 
 The blocking rule was positioned before the general LAN allow rule. This ordering is important because pfSense evaluates firewall rules from the top down.
 
-The blocking rule prevents traffic matching the internal network alias from proceeding to the general allow rule.
+The blocking rule uses the `LAB_INTERNAL_NETS` alias as its destination. It prevents matching traffic from proceeding to the general IPv4 allow rule.
 
-The WAN interface also showed no user-defined pass rules in the supplied screenshot. Incoming traffic on that interface is therefore blocked unless an applicable pass rule is added.
+The IPv6 default allow rule was disabled in accordance with the current IPv4-focused lab design.
 
 ## 6. Firewall Log Analysis
 
@@ -168,6 +168,8 @@ The firewall log entries displayed red block indicators, confirming that pfSense
 
 The logs also provided useful information, including source IP address, destination IP address, interface and protocol.
 
+The log screenshots were captured using source IP filters for each Windows client, providing separate evidence of the blocked traffic.
+
 ## 7. Summary of Test Results
 
 | Test | Client 01 | Client 02 | Result |
@@ -183,17 +185,19 @@ The logs also provided useful information, including source IP address, destinat
 
 ## 8. Security Analysis
 
-The test results demonstrate that pfSense is enforcing the intended LAN-to-internal-network restrictions.
+The test results demonstrate that pfSense is enforcing the configured LAN-to-internal-network restrictions for the tested traffic.
 
 Both Windows clients were able to communicate with their default gateway and access external network resources. DNS resolution also worked successfully.
 
-However, attempts to access the tested protected network gateways were unsuccessful. The firewall logs confirmed that the ICMP traffic was blocked on the LAN interface.
+However, attempts to access the five tested protected network gateways were unsuccessful. The firewall logs confirmed that the corresponding ICMP traffic was blocked on the LAN interface.
 
 This demonstrates the importance of firewall rule ordering and network segmentation in a security operations environment.
 
-The tests also demonstrate how firewall logs can provide useful evidence when investigating denied network connections.
+The tests also demonstrate how firewall logs can provide useful evidence when investigating denied network connections. The source and destination IP addresses, interface and protocol information can assist an analyst in understanding the nature of a blocked connection.
 
-It is important to note that these tests verify access to the specified gateway addresses. They do not independently establish that every device or every possible traffic path between the internal network segments is isolated.
+It is important to note that these tests verify access to the specified gateway addresses using ICMP. They do not independently establish that every device or every possible TCP, UDP or other traffic path between internal network segments is isolated.
+
+Further testing is therefore required to assess the effectiveness of the wider network segmentation policy.
 
 ## 9. Conclusion
 
@@ -204,12 +208,13 @@ The results confirmed that:
 - Both clients can communicate with the pfSense LAN gateway.
 - Both clients have internet connectivity.
 - DNS resolution is functioning.
-- Traffic directed towards the tested protected network gateways is blocked.
+- ICMP traffic directed towards the five tested protected network gateways is blocked.
 - pfSense records the blocked traffic in its firewall logs.
+- The configured LAN blocking rule is positioned above the general IPv4 allow rule.
 
-The results provide evidence that the pfSense firewall is enforcing the intended LAN access restrictions.
+The results provide evidence that the pfSense firewall is enforcing the intended LAN access restrictions for the traffic tested.
 
-Further testing will be required to verify communication restrictions between all internal network segments and to confirm the complete isolation of the SOC lab.
+Further testing will be required to verify communication restrictions between all internal network segments and to assess the complete isolation of the SOC lab.
 
 ## 10. Evidence and Screenshots
 
@@ -219,15 +224,15 @@ The screenshots supporting this testing exercise are stored in:
 
 Evidence includes:
 
-- Windows Client 01 LAN internet access test.
-- Windows Client 01 LAN isolation test.
-- Windows Client 01 DNS and internet connectivity test.
-- Windows Client 02 LAN internet access test.
-- Windows Client 02 LAN isolation test.
-- Windows Client 02 DNS and internet connectivity test.
-- pfSense LAN firewall rules.
-- pfSense firewall logs showing blocked traffic from Client 01.
-- pfSense firewall logs showing blocked traffic from Client 02.
+- `Win-01-Test LAN internet access.png` – Client 01 internet connectivity.
+- `Win-01-Test LAN isolation.png` – Client 01 protected gateway connectivity test.
+- `Win-01-internet-dns-connectivity-test.png` – Client 01 DNS and internet connectivity.
+- `Win-02-Test LAN internet access.png` – Client 02 internet connectivity.
+- `Win-02-Test LAN isolation.png` – Client 02 protected gateway connectivity test.
+- `Win-02-internet-dns-connectivity-test.png` – Client 02 DNS and internet connectivity.
+- `pfSense-LAN-firewall-rules.png` – LAN firewall rule configuration.
+- `pfSense-blocked-traffic-Win-01.png` – Firewall logs showing blocked traffic from Client 01.
+- `pfSense-blocked-traffic-Win-02.png` – Firewall logs showing blocked traffic from Client 02.
 
 ## 11. Lessons Learned
 
@@ -239,5 +244,6 @@ This exercise provided practical experience in:
 - Using command-line tools such as `ping`, `ipconfig` and `nslookup` to troubleshoot connectivity.
 - Analysing firewall logs to identify blocked traffic.
 - Understanding how network segmentation contributes to a secure SOC environment.
+- Using technical evidence to validate firewall behaviour and document security testing.
 
 The exercise establishes a foundation for subsequent SOC lab activities, including deploying monitoring systems, collecting network telemetry and investigating security events.
