@@ -45,6 +45,7 @@ The project is designed around the following network environments:
 - Server Network – Infrastructure and server systems.
 - SOC Network – Security monitoring and analysis.
 - Red Team Network – Controlled security testing environment.
+  
 
 Detailed IP addressing, network diagrams and firewall configurations will be documented as the environment is configured.
 
